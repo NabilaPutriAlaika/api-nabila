@@ -1,120 +1,40 @@
-import subprocess
-import sys
-import json
+# app.py
 from flask import Flask, jsonify, request
-
-# Cek dan install Flask jika belum ada
-try:
-    from flask import Flask, jsonify, request
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "flask"])
-    from flask import Flask, jsonify, request
+import json
 
 app = Flask(__name__)
 
-# Muat data dari file JSON
+# Load data from JSON file
 with open('data.json') as f:
     data = json.load(f)
 
-products = data["products"]
-users = data["users"]
-orders = []
+# Classes for basic structure (optional, can omit if unnecessary)
+class Product:
+    def __init__(self, id, name, price, description):
+        self.id = id
+        self.name = name
+        self.price = price
+        self.description = description
 
-# Produk Endpoint
+# Endpoint to get all products
 @app.route('/api/v1/products', methods=['GET'])
 def get_products():
-    return jsonify(products)
+    return jsonify(data['products']), 200
 
-@app.route('/api/v1/products/<int:id>', methods=['GET'])
-def get_product(id):
-    product = next((p for p in products if p['id'] == id), None)
-    if not product:
-        return jsonify({"message": "Product not found"}), 404
-    return jsonify(product)
-
+# Endpoint to add a new product
 @app.route('/api/v1/products', methods=['POST'])
 def add_product():
-    new_product = {
-        "id": len(products) + 1,
-        "name": request.json['name'],
-        "description": request.json['description'],
-        "price": request.json['price'],
-        "stock": request.json['stock']
-    }
-    products.append(new_product)
+    new_product = request.json
+    new_product['id'] = len(data['products']) + 1
+    data['products'].append(new_product)
+    save_data()
     return jsonify(new_product), 201
 
-@app.route('/api/v1/products/<int:id>', methods=['PUT'])
-def update_product(id):
-    product = next((p for p in products if p['id'] == id), None)
-    if not product:
-        return jsonify({"message": "Product not found"}), 404
-    
-    product['name'] = request.json.get('name', product['name'])
-    product['description'] = request.json.get('description', product['description'])
-    product['price'] = request.json.get('price', product['price'])
-    product['stock'] = request.json.get('stock', product['stock'])
-    
-    return jsonify(product)
+# Function to save data back to JSON file
+def save_data():
+    with open('data.json', 'w') as f:
+        json.dump(data, f, indent=4)
 
-@app.route('/api/v1/products/<int:id>', methods=['DELETE'])
-def delete_product(id):
-    global products
-    products = [p for p in products if p['id'] != id]
-    return jsonify({"message": "Product deleted"}), 204
-
-# Pengguna Endpoint
-@app.route('/api/v1/users/register', methods=['POST'])
-def register_user():
-    new_user = {
-        "id": len(users) + 1,
-        "username": request.json['username'],
-        "password": request.json['password'],  # Password should be hashed in a real app
-        "email": request.json['email'],
-        "address": request.json['address']
-    }
-    users.append(new_user)
-    return jsonify(new_user), 201
-
-@app.route('/api/v1/users/login', methods=['POST'])
-def login_user():
-    user = next((u for u in users if u['username'] == request.json['username'] and u['password'] == request.json['password']), None)
-    if not user:
-        return jsonify({"message": "Invalid credentials"}), 400
-    
-    token = "mock-jwt-token"  # Placeholder token
-    return jsonify({"message": "Login successful", "token": token})
-
-@app.route('/api/v1/users/profile', methods=['GET'])
-def get_user_profile():
-    user = users[0]  # Simulasi profil pengguna
-    return jsonify(user)
-
-# Pesanan Endpoint
-@app.route('/api/v1/orders', methods=['POST'])
-def create_order():
-    new_order = {
-        "id": len(orders) + 1,
-        "userId": request.json['userId'],
-        "items": request.json['items'],
-        "totalAmount": request.json['totalAmount'],
-        "shippingAddress": request.json['shippingAddress'],
-        "paymentMethod": request.json['paymentMethod']
-    }
-    orders.append(new_order)
-    return jsonify(new_order), 201
-
-@app.route('/api/v1/orders', methods=['GET'])
-def get_orders():
-    return jsonify(orders)
-
-@app.route('/api/v1/orders/<int:orderId>', methods=['GET'])
-def get_order(orderId):
-    order = next((o for o in orders if o['id'] == orderId), None)
-    if not order:
-        return jsonify({"message": "Order not found"}), 404
-    return jsonify(order)
-
-# Jalankan server
-if __name__ == '__main__':
+# Main entry point
+if __name__ == "__main__":
     app.run(debug=True)
