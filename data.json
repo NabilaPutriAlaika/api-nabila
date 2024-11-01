@@ -3,39 +3,16 @@
         {
             "id": 1,
             "name": "EXO Lightstick",
-            "description": "Official EXO Lightstick Ver.3",
-            "price": 500000,
-            "stock": 10
+            "price": 250000,
+            "description": "Official EXO lightstick"
         },
         {
             "id": 2,
-            "name": "EXO T-Shirt",
-            "description": "Official EXO Merchandise T-Shirt",
-            "price": 300000,
-            "stock": 20
-        },
-        {
-            "id": 3,
-            "name": "EXO Hoodie",
-            "description": "Official EXO Hoodie",
-            "price": 450000,
-            "stock": 15
+            "name": "EXO Album",
+            "price": 150000,
+            "description": "Latest EXO album"
         }
     ],
-    "users": [
-        {
-            "id": 1,
-            "username": "exofan88",
-            "password": "securepassword123",
-            "email": "exofan88@example.com",
-            "address": "Seoul"
-        },
-        {
-            "id": 2,
-            "username": "exofan99",
-            "password": "password123",
-            "email": "exofan99@example.com",
-            "address": "Busan"
-        }
-    ]
+    "users": [],
+    "orders": []
 }
