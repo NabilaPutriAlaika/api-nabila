@@ -1,21 +1,26 @@
+import subprocess
+import sys
+import json
 from flask import Flask, jsonify, request
+
+# Cek dan install Flask jika belum ada
+try:
+    from flask import Flask, jsonify, request
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "flask"])
+    from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# Simulasi database
-products = [
-    { "id": 1, "name": "EXO Lightstick", "description": "Official EXO Lightstick Ver.3", "price": 500000, "stock": 10 },
-    { "id": 2, "name": "EXO T-Shirt", "description": "Official EXO Merchandise T-Shirt", "price": 300000, "stock": 20 }
-]
+# Muat data dari file JSON
+with open('data.json') as f:
+    data = json.load(f)
 
-users = [
-    { "id": 1, "username": "exofan88", "password": "securepassword123", "email": "exofan88@example.com", "address": "Seoul" }
-]
-
+products = data["products"]
+users = data["users"]
 orders = []
 
-# 1. **Produk Endpoint**
-
+# Produk Endpoint
 @app.route('/api/v1/products', methods=['GET'])
 def get_products():
     return jsonify(products)
@@ -58,14 +63,13 @@ def delete_product(id):
     products = [p for p in products if p['id'] != id]
     return jsonify({"message": "Product deleted"}), 204
 
-# 2. **Pengguna Endpoint**
-
+# Pengguna Endpoint
 @app.route('/api/v1/users/register', methods=['POST'])
 def register_user():
     new_user = {
         "id": len(users) + 1,
         "username": request.json['username'],
-        "password": request.json['password'],  # Note: Passwords should be hashed in a real app
+        "password": request.json['password'],  # Password should be hashed in a real app
         "email": request.json['email'],
         "address": request.json['address']
     }
@@ -78,17 +82,15 @@ def login_user():
     if not user:
         return jsonify({"message": "Invalid credentials"}), 400
     
-    # Placeholder token for simplicity
-    token = "mock-jwt-token"
+    token = "mock-jwt-token"  # Placeholder token
     return jsonify({"message": "Login successful", "token": token})
 
 @app.route('/api/v1/users/profile', methods=['GET'])
 def get_user_profile():
-    user = users[0]  # Simulasi profil pengguna (autentikasi tidak diimplementasikan di sini)
+    user = users[0]  # Simulasi profil pengguna
     return jsonify(user)
 
-# 3. **Pesanan Endpoint**
-
+# Pesanan Endpoint
 @app.route('/api/v1/orders', methods=['POST'])
 def create_order():
     new_order = {
@@ -113,6 +115,6 @@ def get_order(orderId):
         return jsonify({"message": "Order not found"}), 404
     return jsonify(order)
 
-# Run server
+# Jalankan server
 if __name__ == '__main__':
     app.run(debug=True)
